@@ -59,29 +59,83 @@ class Entrega {
      * És cert que ∀x ∃!y. P(x) -> Q(x,y) ?
      */
     static boolean exercici1(int[] universe, Predicate<Integer> p, BiPredicate<Integer, Integer> q) {
-      return false; // TO DO
-    }
 
-    /*
-     * És cert que ∃!x ∀y. P(y) -> Q(x,y) ?
-     */
-    static boolean exercici2(int[] universe, Predicate<Integer> p, BiPredicate<Integer, Integer> q) {
-      return false; // TO DO
-    }
+      for(int x : universe){
+          int count = 0;
+          for(int y : universe){
+              if(p.test(x) && q.test(x,y)){
+                  count++;
+              }
+          }
+          if(count != 1){
+              return false;
+          }
+      }
 
-    /*
-     * És cert que ∃x,y ∀z. P(x,z) ⊕ Q(y,z) ?
-     */
-    static boolean exercici3(int[] universe, BiPredicate<Integer, Integer> p, BiPredicate<Integer, Integer> q) {
-      return false; // TO DO
-    }
+      return true;
+  }
 
-    /*
-     * És cert que (∀x. P(x)) -> (∀x. Q(x)) ?
-     */
-    static boolean exercici4(int[] universe, Predicate<Integer> p, Predicate<Integer> q) {
-      return false; // TO DO
-    }
+  /*
+   * És cert que ∃!x ∀y. P(y) -> Q(x,y) ?
+   */
+  static boolean exercici2(int[] universe, Predicate<Integer> p, BiPredicate<Integer, Integer> q) {
+      int count = 0;
+      int result;
+      for (int x : universe) {
+          boolean satisfies = true;
+          for (int y : universe) {
+              if (p.test(y) && !q.test(x, y)) {
+                  satisfies = false;
+                  break;
+              }
+          }
+          if (satisfies) {
+              count++;
+              result = x;
+          }
+      }
+      return count == 1;
+  }
+
+  /*
+   * És cert que ∃x,y ∀z. P(x,z) ⊕ Q(y,z) ?
+   */
+  static boolean exercici3(int[] universe, BiPredicate<Integer, Integer> p, BiPredicate<Integer, Integer> q) {
+
+      for(int x : universe){
+          for(int y : universe){
+              int count = 0;
+              for(int z : universe){
+                  if(p.test(x,z) ^ q.test(y,z)){
+                      count++;
+                  }
+              }
+              if(count == universe.length){
+                  return true;
+              }
+          }
+      }
+
+      return false;
+  }
+
+  /*
+   * És cert que (∀x. P(x)) -> (∀x. Q(x)) ?
+   */
+  static boolean exercici4(int[] universe, Predicate<Integer> p, Predicate<Integer> q) {
+      for (int x : universe) {
+          if (!p.test(x)) {//La implicació es certa
+              return true;
+
+          }
+      }
+      for (int x : universe) {
+          if (!q.test(x)) {//La implicació es falsa
+              return false;
+          }
+      }
+      return true;
+  }
 
     /*
      * Aquí teniu alguns exemples i proves relacionades amb aquests exercicis (vegeu `main`)
@@ -188,8 +242,62 @@ class Entrega {
      * Podeu soposar que `a` està ordenat de menor a major.
      */
     static boolean exercici1(int[] a, int[][] rel) {
-      return false; // TO DO
-    }
+      boolean reflexiva = true;
+      boolean transitiva = true;
+      boolean simetrica = true;
+
+      boolean fin = true;
+
+      //Miram si es reflexiva
+      for (int i = 0; i < a.length; i++) {
+          if (!relacio(a[i], a[i], rel)) {
+              reflexiva = false;
+          }
+      }
+
+      //Miram si és transitiva
+      for (int[] rel1 : rel) {
+          for (int[] rel2 : rel) {
+              if (rel1[1] == rel2[0] && !relacio(rel1[0], rel2[1], rel)) {
+                  transitiva = false;
+              }
+          }
+      }
+
+      for (int i = 0; i < rel.length; i++) {
+          int a1 = rel[i][0];
+          int a2 = rel[i][1];
+          boolean pairFound = false;
+          for (int j = 0; j < rel.length; j++) {
+              if (rel[j][0] == a2 && rel[j][1] == a1) {
+                  pairFound = true;
+                  break;
+              }
+          }
+          if (!pairFound) {
+              simetrica = false;
+              break;
+          }
+      }
+
+      //Si no es compleixen totes les condicions, el resultat serà fals
+      if((!reflexiva) || (!simetrica) || (!transitiva)){
+          fin = false;
+      }
+
+      return fin; // TO DO
+  }
+
+  //Mètode que ens diu si els paràmetres a i b passats per paràmetre estan relacionats amn l'array rel
+  private static boolean relacio(int i, int j, int[][] rel) {
+      for (int[] rela : rel) {
+          if (rela[0] == i && rela[1] == j) {
+              return true;
+          }
+      }
+      return false;
+  }
+
 
     /*
      * Comprovau si la relació `rel` definida sobre `a` és d'equivalència. Si ho és, retornau el
@@ -207,7 +315,22 @@ class Entrega {
      * Podeu soposar que `a` i `b` estan ordenats de menor a major.
      */
     static boolean exercici3(int[] a, int[] b, int[][] rel) {
-      return false; // TO DO
+           // Verificar si cada elemento tiene una imagen
+           for (int elemento1 = 0; elemento1 < a.length; elemento1++) {
+            boolean Imagen = false;
+            for (int elemento2 = 0; elemento2 < rel.length; elemento2++) {
+                if ((rel[elemento2][0]==a[elemento1])&&(rel[elemento2][1]==b[elemento1])) {
+                    Imagen = true;
+                    break;
+                }
+            }
+            if (!Imagen) {
+                System.out.println("Tema 2, Ejercicio 3: FALSE");
+                return false;
+            }
+        }
+        System.out.println("Tema 2, Ejercicio 3: TRUE");
+        return true;
     }
 
     /*
@@ -351,8 +474,22 @@ class Entrega {
      * Retornau l'ordre menys la mida del graf (no dirigit).
      */
     static int exercici1(int[][] g) {
-      return -1; // TO DO
-    }
+      int orden = g.length; // Número de vértices (tamaño de la matriz g)
+  
+      int tamano = 0; // Número de aristas
+  
+      for (int i = 0; i < g.length; i++) {
+          for (int j = i + 1; j < g[i].length; j++) {
+              if (g[i][j] == 1) { // Si hay una arista entre los vértices i y j
+                  tamano++;
+              }
+          }
+      }
+  
+      int resultado = orden - tamano;
+      return resultado;
+  }
+  
 
     /*
      * Suposau que el graf (no dirigit) és connex. És bipartit?
@@ -366,8 +503,8 @@ class Entrega {
      * vèrtex i-èssim.
      */
     static int exercici3(int[][] g, int i) {
-      return -1; // TO DO
-    }
+      return -1;
+  }
 
     /*
      * Donat un arbre arrelat (dirigit, suposau que l'arrel es el vèrtex 0), trobau-ne el diàmetre.
@@ -494,7 +631,7 @@ class Entrega {
    */
   public static void main(String[] args) {
     Tema1.tests();
-    Tema2.tests();
+    //Tema2.tests();
     Tema3.tests();
   }
 
